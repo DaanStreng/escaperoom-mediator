@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+    <style>
+        html,body{
+            width:100%;
+            height:100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row spacer"></div>
+        <div class="row">
+            <div class="col s12">
+                <table class="table striped table-striped bordered">
+                    <thead>
+                        <tr>
+                            <th>Room name</th>
+                            <th>Room endpoint</th>
+                            <th>Room online</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function(){
+            checkOnlineRooms();
+        })
+        function checkOnlineRooms(){
+            $.ajax({
+                url:"/mainroom/registration/allrooms",
+                accept: {
+                    json: 'application/json',
+                    text: 'application/json'
+                },
+                dataType:"json",
+                success:function(data){
+                    var body = $("#tableBody");
+                    body.html("");
+                    data.forEach(function(elm){
+                        var row = $("<tr></tr>");
+                        var td = $("<td></td>").html(elm.name);
+                        row.append(td);
+                        td = $("<td></td>").html(elm.endPoint);
+                        row.append(td);
+                        var div = $("<div></div>").css({"width":"15px","height":"15px","border-radius":"50px"});
+                        if (elm.online){
+                            div.css("background-color","lime");
+                        }
+                        else div.css("background-color","red");
+                        td = $("<td></td>").html(div);
+                        row.append(td);
+                        body.append(row);
+                    });
+                    setTimeout(checkOnlineRooms,10000);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

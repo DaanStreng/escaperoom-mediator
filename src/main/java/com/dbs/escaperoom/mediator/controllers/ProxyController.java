@@ -32,7 +32,7 @@ public abstract class ProxyController {
     protected String proxyTargetURL;
     protected String proxyBase;
 
-    protected String startUrl = "http://escape.daanstreng.nl";
+    protected String startUrl = "http://escape.daanstreng.nl/";
 
     protected byte[] getResource(String base){
         Resource resource =
@@ -79,7 +79,7 @@ public abstract class ProxyController {
     }
 
 
-    @RequestMapping(method = RequestMethod.GET, value = "/**")
+    @RequestMapping(method = RequestMethod.GET, value = "/**",produces = MediaType.ALL_VALUE)
     public ResponseEntity<Object> getAny(HttpServletRequest request){
         RestTemplate restTemplate = new RestTemplate();
         String base = request.getServletPath();
@@ -96,10 +96,18 @@ public abstract class ProxyController {
             responseHeaders.setContentType(MediaType.TEXT_HTML);
             return new ResponseEntity<Object>(getResource(base),responseHeaders, HttpStatus.OK);
         }
-        Object quote = restTemplate.getForObject(this.proxyTargetURL+base, Object.class);
-        HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<Object>(quote,responseHeaders, HttpStatus.OK);
+        if (! (base.contains(".png")||base.contains(".jpg")||base.contains(".jpeg")||base.contains(".bmp"))) {
+            Object quote = restTemplate.getForObject(this.proxyTargetURL + base, Object.class);
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+            return new ResponseEntity<Object>(quote, responseHeaders, HttpStatus.OK);
+        }
+        else{
+            ResponseEntity<byte[]> result = restTemplate.getForEntity(this.proxyTargetURL + base,byte[].class);
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.setContentType(MediaType.IMAGE_PNG);
+            return new ResponseEntity<Object>(result.getBody(), responseHeaders, HttpStatus.OK);
+        }
     }
 
 
@@ -120,9 +128,11 @@ public abstract class ProxyController {
         for(String k : mapR.keySet()){
             String value = mapR.get(k)[0];
             map.add(k,value);
+            System.out.println(k+" "+value);
         }
+        System.out.println("flup");
         HttpEntity<MultiValueMap<String,String>> newRequest = new HttpEntity<MultiValueMap<String, String>>(map,headers);
-        System.out.println(base);
+        System.out.println(this.proxyTargetURL+base);
         ResponseEntity<Object> response = null;
         try {
             response = restTemplate.exchange(this.proxyTargetURL + base, HttpMethod.POST, newRequest, Object.class);

@@ -1,7 +1,7 @@
 package com.dbs.escaperoom.mediator.controllers;
-
+import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,7 +13,7 @@ import java.io.*;
 @RestController
 public class ViewController {
     @RequestMapping(method = RequestMethod.GET)
-    public byte[] getIndex(HttpServletRequest request){
+    public ResponseEntity<byte[]> getIndex(HttpServletRequest request){
         System.out.println("We get into view");
         try {
             ClassPathResource resource = new ClassPathResource("/static"+request.getServletPath());
@@ -25,16 +25,17 @@ public class ViewController {
             }
             else
                 sr = (new ClassPathResource("/static/index.html").getInputStream());
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            int read;
-            byte[] input = new byte[4096];
-            while ( -1 != ( read = sr.read( input ) ) ) {
-                buffer.write( input, 0, read );
-            }
-            input = buffer.toByteArray();
-            return input;
+            byte[] bytes = IOUtils.toByteArray(sr);
+            HttpHeaders headers = new HttpHeaders();
+
+            headers.setCacheControl(CacheControl.noCache().getHeaderValue());
+
+            ResponseEntity<byte[]> responseEntity = new ResponseEntity<>(bytes, headers, HttpStatus.OK);
+            return responseEntity;
         }
         catch(Exception e){}
-        return new byte[0];
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<byte[]> responseEntity = new ResponseEntity<>(new byte[0], headers, HttpStatus.OK);
+        return responseEntity;
     }
 }

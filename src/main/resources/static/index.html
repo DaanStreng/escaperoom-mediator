@@ -37,7 +37,7 @@
 <body>
 <header>
     <nav class="top-nav center" style="height:122px;line-height:122px; background-color:#3c3c3c">
-        <div class="container">
+        <div class="container" id="refreshClickHere">
             <div class="nav-wrapper"><a style="font-size:150%" class="page-title">Escape Room XL Online mega super turbo</a></div>
         </div>
     </nav>
@@ -76,6 +76,7 @@
                 <div class="collapsible-body" style="font-weight:300">
                     <ul>
                         <li class=""><a id="testRoomProxyButton">Test Room Proxy</a></li>
+                        <li class=""><a  class="iframe-fill-link" href="/rooms.html" >View All Rooms</a></li>
                         <li class=""><a class="iframe-fill-link" href="/mainroom/view/register">Register a room</a></li>
                     </ul>
                 </div>
@@ -162,6 +163,10 @@
             var href = $(this).attr("href");
             $("#proxyFrame").attr("src",href);
         });
+        $("#refreshClickHere").click(function(){
+            var iframe = document.getElementById("proxyFrame");
+            iframe.contentDocument.location.reload(true);
+        })
 
 
     });
